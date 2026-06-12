@@ -15,6 +15,7 @@ enum ProductStatus : uint8_t {
     ProductSoldOut,
     ProductRetired,
     ProductDraft,
+    ProductAwaitingApproval,
     ProductUnknown,
 };
 

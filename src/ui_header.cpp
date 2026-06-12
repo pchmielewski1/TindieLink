@@ -1,7 +1,12 @@
 #include "ui.h"
+#include "config.h"
 #include "ui_common.h"
-#include <M5StickCPlus2.h>
+#include "ui_frame_dump.h"
 #include <stdio.h>
+
+#ifndef UI_FRAME_DUMP
+#define UI_FRAME_DUMP 0
+#endif
 
 void ui_repaint_header(const AppContext* ctx, const ProductsCache* cache) {
     if (!cache || !ctx) {
@@ -10,31 +15,30 @@ void ui_repaint_header(const AppContext* ctx, const ProductsCache* cache) {
 
     char hhmm[8];
     cache_format_sync_time(cache, hhmm, sizeof(hhmm));
-    char header[48];
 
     switch (ctx->screen) {
         case ScreenList:
-            snprintf(header, sizeof(header), "%d prod  #%d  sync %s%s",
-                cache->count,
-                cache->count > 0 ? ctx->selected_index + 1 : 0,
-                hhmm,
-                ctx->fetching ? " *" : "");
-            ui_header_bar(header, 0x0010, 0xFFE0);
+            ui_draw_list_header(ctx->selected_index, cache->count, ctx->fetching, hhmm);
             break;
         case ScreenDetail: {
             const Product* p = cache_get(cache, ctx->detail_index);
             if (!p) {
                 return;
             }
-            snprintf(header, sizeof(header), "%d/%d  #%lu  %s",
-                ctx->detail_index + 1,
-                cache->count,
-                (unsigned long)p->id,
-                hhmm);
-            ui_header_bar(header, 0x0010, 0xFFE0);
+            char left[16];
+            char center[16];
+            char right[10];
+            snprintf(left, sizeof(left), "%d of %d",
+                ctx->detail_index + 1, cache->count);
+            snprintf(center, sizeof(center), "#%lu", (unsigned long)p->id);
+            ui_format_header_time_right(right, sizeof(right), hhmm, ctx->fetching);
+            ui_header_bar_zones(left, center, right);
             break;
         }
         default:
             break;
     }
+#if UI_FRAME_DUMP
+    ui_frame_dump_after_redraw();
+#endif
 }

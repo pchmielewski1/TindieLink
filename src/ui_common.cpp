@@ -1,5 +1,7 @@
 #include "ui_common.h"
 #include "logo_sprite.h"
+#include "tindie_client.h"
+#include "text_layout.h"
 #include <M5StickCPlus2.h>
 #include <Arduino.h>
 #include <pgmspace.h>
@@ -79,23 +81,30 @@ uint16_t ui_status_fg(ProductStatus status) {
             return 0xC618;
         case ProductDraft:
             return 0xFFE0;
+        case ProductAwaitingApproval:
+            return 0xFFFF;
         default:
             return 0xFFFF;
     }
 }
 
 uint16_t ui_status_bg(ProductStatus status, bool selected) {
+    if (selected) {
+        return kSelectedRowBg;
+    }
     switch (status) {
         case ProductForSale:
-            return selected ? 0x0640 : 0x0320;
+            return 0x0320;
         case ProductSoldOut:
-            return selected ? 0xC800 : 0x8410;
+            return 0x4208;
         case ProductRetired:
-            return selected ? 0x4208 : 0x2104;
+            return 0x2104;
         case ProductDraft:
-            return selected ? 0x0015 : 0x000A;
+            return 0x000A;
+        case ProductAwaitingApproval:
+            return 0x2945;
         default:
-            return selected ? 0x4208 : 0x2104;
+            return 0x2104;
     }
 }
 
@@ -129,6 +138,73 @@ void ui_header_bar(const char* text, uint16_t bg, uint16_t fg) {
     const UiMetrics m = ui_metrics();
     ui_fill_rect(m.x, m.y, m.w, m.header_h, bg);
     ui_text(m.x + 2, m.y + 2, text, fg, bg);
+}
+
+void ui_header_bar_zones(const char* left, const char* center, const char* right,
+    uint16_t bg, uint16_t fg, uint16_t center_fg) {
+    const UiMetrics m = ui_metrics();
+    ui_fill_rect(m.x, m.y, m.w, m.header_h, bg);
+    StickCP2.Display.setTextSize(1);
+    StickCP2.Display.setFont(&fonts::Font0);
+    StickCP2.Display.setTextColor(fg, bg);
+
+    if (left && left[0]) {
+        StickCP2.Display.setTextDatum(textdatum_t::middle_left);
+        StickCP2.Display.drawString(left, m.x + 2, m.y + m.header_h / 2);
+    }
+    if (center && center[0]) {
+        const uint16_t cfg = center_fg ? center_fg : fg;
+        StickCP2.Display.setTextColor(cfg, bg);
+        StickCP2.Display.setTextDatum(textdatum_t::middle_center);
+        StickCP2.Display.drawString(center, m.x + m.w / 2, m.y + m.header_h / 2);
+        StickCP2.Display.setTextColor(fg, bg);
+    }
+    if (right && right[0]) {
+        StickCP2.Display.setTextDatum(textdatum_t::middle_right);
+        StickCP2.Display.drawString(right, m.x + m.w - 2, m.y + m.header_h / 2);
+    }
+    StickCP2.Display.setTextDatum(textdatum_t::top_left);
+}
+
+void ui_format_header_time_right(char* out, size_t out_len, const char* hhmm, bool fetching) {
+    if (!out || out_len == 0) {
+        return;
+    }
+    const char* time_str = (hhmm && hhmm[0]) ? hhmm : "--:--";
+    snprintf(out, out_len, "%s %c", time_str, fetching ? '*' : ' ');
+}
+
+void ui_draw_list_header(int selected_index, int product_count, bool fetching, const char* hhmm) {
+    char left[20];
+    char center[24];
+    char right[10];
+    snprintf(left, sizeof(left), "#%d  %d items",
+        product_count > 0 ? selected_index + 1 : 0, product_count);
+    truncate_to_width_ellipsis(tindie_store_display_name(), center, sizeof(center), 14);
+    ui_format_header_time_right(right, sizeof(right), hhmm, fetching);
+    ui_header_bar_zones(left, center, right, kHeaderBg, 0xFFFF, kStoreNameFg);
+}
+
+static const int kListRowSlots = 4;
+
+int ui_list_visible_rows(int product_count) {
+    if (product_count < 1) {
+        return 0;
+    }
+    if (product_count > kListRowSlots) {
+        return kListRowSlots;
+    }
+    return product_count;
+}
+
+int ui_list_row_height(const UiMetrics& m, int visible_rows) {
+    (void)visible_rows;
+    const int16_t body_h = m.h - m.header_h - m.footer_h;
+    int row_h = body_h / kListRowSlots;
+    if (row_h < 22) {
+        row_h = 22;
+    }
+    return row_h;
 }
 
 void ui_footer_hint(const char* text) {

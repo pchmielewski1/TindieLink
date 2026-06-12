@@ -13,7 +13,7 @@ Live product monitor for your Tindie seller store on **M5StickC Plus2** (landsca
    cp include/config.h.example include/config.h
    ```
    - `WIFI_SSID` / `WIFI_PASSWORD` — 2.4 GHz network
-   - `TINDIE_USERNAME` — **store slug** (e.g. `PCh`), not login email
+   - `TINDIE_USERNAME` — **store slug**, not login email
    - `TINDIE_API_KEY` — from Tindie seller tools
 
 2. Install PlatformIO (venv recommended):

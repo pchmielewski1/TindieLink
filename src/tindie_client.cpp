@@ -13,11 +13,20 @@ static const int kHttpTimeoutMs = 20000;
 static const int kHttpRetries = 3;
 
 static String g_store_id;
+static String g_store_name;
 static bool g_store_id_resolved = false;
 
 void tindie_reset_store_cache() {
     g_store_id = "";
+    g_store_name = "";
     g_store_id_resolved = false;
+}
+
+const char* tindie_store_display_name() {
+    if (g_store_name.length() > 0) {
+        return g_store_name.c_str();
+    }
+    return TINDIE_USERNAME;
 }
 
 static void build_auth_header(char* out, size_t out_len) {
@@ -123,28 +132,18 @@ static bool resolve_store_id(int* http_code) {
         return false;
     }
 
-    const int store_pos = body.indexOf("\"store\"");
-    if (store_pos < 0) {
+    JsonDocument doc;
+    if (deserializeJson(doc, body)) {
         return false;
     }
-    int id_pos = body.indexOf("\"id\":", store_pos);
-    if (id_pos < 0) {
-        return false;
-    }
-    id_pos += 5;
-    while (id_pos < (int)body.length() &&
-           (body[id_pos] == ' ' || body[id_pos] == ':' || body[id_pos] == '"')) {
-        id_pos++;
-    }
-    id_end = id_pos;
-    while (id_end < (int)body.length() && body[id_end] >= '0' && body[id_end] <= '9') {
-        id_end++;
-    }
-    if (id_end <= id_pos) {
+    JsonObject store = doc["store"].as<JsonObject>();
+    if (store.isNull()) {
         return false;
     }
 
-    g_store_id = body.substring(id_pos, id_end);
+    g_store_id = store["id"].as<String>();
+    g_store_name = store["name"].as<String>();
+    body = "";
     g_store_id_resolved = g_store_id.length() > 0;
     return g_store_id_resolved;
 }
@@ -276,7 +275,7 @@ TindieFetchResponse tindie_fetch_all_products(Product* out, int max_out) {
     }
 
     const String url = String(kHost) + "/api/v2/products/?format=json&limit=50&store=" + g_store_id;
-    const int n = fetch_products_body(url, &code, out, max_out);
+    int n = fetch_products_body(url, &code, out, max_out);
     resp.http_code = code;
 
     if (code == 401) {

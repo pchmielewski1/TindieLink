@@ -1,5 +1,6 @@
 #include "app.h"
 #include "config.h"
+#include "product_filter.h"
 #include "tindie_client.h"
 #include "thumb_loader.h"
 #include "ui.h"
@@ -118,6 +119,7 @@ static bool app_fetch(AppContext* ctx, ProductsCache* cache, bool keep_cached_on
     ctx->fetching = false;
 
     if (resp.result == FetchOk) {
+        resp.product_count = product_filter_list(g_fetch_scratch, resp.product_count);
         const bool changed = cache_data_changed(cache, g_fetch_scratch, resp.product_count);
         cache_update(cache, g_fetch_scratch, resp.product_count);
         if (changed) {

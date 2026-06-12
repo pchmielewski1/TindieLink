@@ -1,6 +1,7 @@
 #include "ui.h"
 #include "ui_common.h"
 #include "config.h"
+#include "text_layout.h"
 #include <M5StickCPlus2.h>
 #include <stdio.h>
 
@@ -33,36 +34,40 @@ static void ui_error_screen(const char* title, const char* line1, const char* li
 }
 
 void ui_draw_error_config() {
-    ui_error_screen("Konfiguracja", "Uzupelnij config.h", "WiFi + Tindie API key");
+    ui_error_screen("Setup", "Edit include/config.h", "WiFi and Tindie API key");
 }
 
 void ui_draw_wifi_connecting() {
     ui_begin_boot_frame();
     const UiMetrics m = ui_metrics();
     ui_header_bar("WiFi", 0x0010, 0xFFE0);
-    char line[48];
-    snprintf(line, sizeof(line), "SSID: %s", WIFI_SSID);
-    ui_text(m.x + 2, m.y + m.header_h + 4, "Laczenie...", 0xFFFF, 0x0000);
-    ui_text(m.x + 2, m.y + m.header_h + 18, line, 0x07FF, 0x0000);
+    ui_fill_rect(m.x, m.y + m.header_h, m.w, m.line_h + 4, 0x2104);
+    ui_text(m.x + 4, m.y + m.header_h + 2, "Connecting...", 0xFFFF, 0x2104);
+    char ssid_line[40];
+    char ssid_short[32];
+    truncate_ssid(WIFI_SSID, ssid_short, sizeof(ssid_short), 24);
+    snprintf(ssid_line, sizeof(ssid_line), "SSID: %s", ssid_short);
+    ui_fill_rect(m.x, m.y + m.header_h + m.line_h + 4, m.w, m.line_h + 4, 0x1082);
+    ui_text(m.x + 4, m.y + m.header_h + m.line_h + 6, ssid_line, 0x07FF, 0x1082);
 }
 
 void ui_draw_error_wifi() {
-    ui_error_screen("Blad WiFi", "Sprawdz SSID/haslo", "w config.h");
+    ui_error_screen("WiFi error", "Check SSID and password", "in config.h");
 }
 
 void ui_draw_error_api(int http_code) {
     char title[24];
-    snprintf(title, sizeof(title), "Blad API %d", http_code);
+    snprintf(title, sizeof(title), "API error %d", http_code);
     char line1[32];
     char line2[32];
     if (http_code == 401) {
-        snprintf(line1, sizeof(line1), "Zly username");
-        snprintf(line2, sizeof(line2), "lub API key");
+        snprintf(line1, sizeof(line1), "Bad store slug");
+        snprintf(line2, sizeof(line2), "or API key");
     } else if (http_code == 0) {
-        snprintf(line1, sizeof(line1), "Brak polaczenia");
-        snprintf(line2, sizeof(line2), "lub blad JSON");
+        snprintf(line1, sizeof(line1), "No connection");
+        snprintf(line2, sizeof(line2), "or bad JSON");
     } else {
-        snprintf(line1, sizeof(line1), "Sprobuj ponownie");
+        snprintf(line1, sizeof(line1), "Try again");
         line2[0] = '\0';
     }
     ui_error_screen(title, line1, line2);

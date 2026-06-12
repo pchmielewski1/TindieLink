@@ -1,4 +1,5 @@
 #include "ui.h"
+#include "ui_frame_dump.h"
 
 void ui_redraw(const AppContext* ctx, const ProductsCache* cache) {
     switch (ctx->screen) {
@@ -21,4 +22,5 @@ void ui_redraw(const AppContext* ctx, const ProductsCache* cache) {
             ui_draw_detail(cache, ctx);
             break;
     }
+    ui_frame_dump_after_redraw();
 }

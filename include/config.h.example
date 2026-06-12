@@ -8,4 +8,20 @@
 #define THUMB_CACHE_TTL_SEC 1800
 #define THUMB_CACHE_SLOTS 6
 
+// 1 = dump LCD framebuffer to Serial after each UI redraw (for docs / UI debug)
+#define UI_FRAME_DUMP 0
+
+// Timezone (POSIX TZ for setenv). Warsaw: CET/CEST with EU DST rules.
+#define TIMEZONE_TZ "CET-1CEST,M3.5.0,M10.5.0/3"
+// 1 = use TIMEZONE_TZ + automatic DST; 0 = fixed TIMEZONE_OFFSET_SEC only
+#define TIMEZONE_DST_AUTO 1
+#define TIMEZONE_OFFSET_SEC 3600
+
+// List visibility: 1 = show products with this status, 0 = hide
+#define LIST_SHOW_FOR_SALE 1
+#define LIST_SHOW_SOLD_OUT 1
+#define LIST_SHOW_DRAFT 0
+#define LIST_SHOW_RETIRED 0
+#define LIST_SHOW_UNKNOWN 0
+
 bool config_is_valid();

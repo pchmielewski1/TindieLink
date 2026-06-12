@@ -4,10 +4,102 @@
 #include <stdlib.h>
 #include <string.h>
 
-static ProductStatus status_from_api(const char* api_status, int16_t stock) {
-    if (api_status && strcmp(api_status, "retired") == 0) return ProductRetired;
-    if (api_status && strcmp(api_status, "draft") == 0) return ProductDraft;
-    if (stock <= 0) return ProductSoldOut;
+static bool str_ieq(const char* a, const char* b) {
+    if (!a || !b) {
+        return false;
+    }
+    while (*a && *b) {
+        char ca = *a;
+        char cb = *b;
+        if (ca >= 'A' && ca <= 'Z') {
+            ca = (char)(ca - 'A' + 'a');
+        }
+        if (cb >= 'A' && cb <= 'Z') {
+            cb = (char)(cb - 'A' + 'a');
+        }
+        if (ca != cb) {
+            return false;
+        }
+        ++a;
+        ++b;
+    }
+    return *a == '\0' && *b == '\0';
+}
+
+static bool str_has_icase(const char* haystack, const char* needle) {
+    if (!haystack || !needle || !needle[0]) {
+        return false;
+    }
+    const size_t nlen = strlen(needle);
+    for (const char* p = haystack; *p; ++p) {
+        size_t i = 0;
+        while (i < nlen && p[i]) {
+            char a = p[i];
+            char b = needle[i];
+            if (a >= 'A' && a <= 'Z') {
+                a = (char)(a - 'A' + 'a');
+            }
+            if (b >= 'A' && b <= 'Z') {
+                b = (char)(b - 'A' + 'a');
+            }
+            if (a != b) {
+                break;
+            }
+            ++i;
+        }
+        if (i == nlen) {
+            return true;
+        }
+    }
+    return false;
+}
+
+static bool is_awaiting_status(const char* api_status, const char* api_state) {
+    if (str_ieq(api_status, "awaiting_admin_approval") ||
+        str_ieq(api_status, "pending_approval") ||
+        str_ieq(api_status, "awaiting_approval") ||
+        str_ieq(api_state, "awaiting_admin_approval") ||
+        str_ieq(api_state, "pending_approval") ||
+        str_ieq(api_state, "awaiting_approval")) {
+        return true;
+    }
+    if (str_has_icase(api_status, "awaiting") || str_has_icase(api_state, "awaiting")) {
+        return true;
+    }
+    if (str_has_icase(api_status, "pending approval") ||
+        str_has_icase(api_state, "pending approval")) {
+        return true;
+    }
+    if (str_has_icase(api_status, "approval") || str_has_icase(api_state, "approval")) {
+        if (!str_has_icase(api_status, "for sale") && !str_has_icase(api_state, "for sale")) {
+            return true;
+        }
+    }
+    return false;
+}
+
+static ProductStatus status_from_api(const char* api_status, const char* api_state, int16_t stock) {
+    if (api_status && str_ieq(api_status, "retired")) {
+        return ProductRetired;
+    }
+    if (api_state && str_ieq(api_state, "retired")) {
+        return ProductRetired;
+    }
+    if (api_status && (str_ieq(api_status, "resubmitted") || str_ieq(api_status, "submitted"))) {
+        return ProductAwaitingApproval;
+    }
+    if (is_awaiting_status(api_status, api_state)) {
+        return ProductAwaitingApproval;
+    }
+    if (api_status && str_ieq(api_status, "draft")) {
+        return ProductDraft;
+    }
+    if (api_state && str_ieq(api_state, "draft")) {
+        return ProductDraft;
+    }
+    if (stock <= 0) {
+        return ProductSoldOut;
+    }
     return ProductForSale;
 }
 
@@ -17,8 +109,41 @@ static const char* label_from_status(ProductStatus st) {
         case ProductSoldOut: return "Sold Out";
         case ProductRetired: return "Retired";
         case ProductDraft: return "Draft";
+        case ProductAwaitingApproval: return "Awaiting Admin Approval";
         default: return "Unknown";
     }
+}
+
+static void set_status_label(Product& p, const char* api_status, const char* api_state) {
+    if (p.status == ProductAwaitingApproval &&
+        api_status && str_ieq(api_status, "resubmitted")) {
+        strncpy(p.status_label, "Awaiting Admin Approval", kStatusLen - 1);
+        p.status_label[kStatusLen - 1] = '\0';
+        return;
+    }
+
+    const char* pick = nullptr;
+    if (p.status == ProductAwaitingApproval) {
+        if (api_state && str_has_icase(api_state, "await")) {
+            pick = api_state;
+        } else if (api_status && str_has_icase(api_status, "await")) {
+            pick = api_status;
+        }
+    } else if (api_state && api_state[0] &&
+        !str_ieq(api_state, "for_sale") && !str_ieq(api_state, "draft") &&
+        !str_ieq(api_state, "retired")) {
+        pick = api_state;
+    }
+
+    if (pick && pick[0]) {
+        strncpy(p.status_label, pick, kStatusLen - 1);
+        p.status_label[kStatusLen - 1] = '\0';
+        return;
+    }
+
+    const char* fallback = label_from_status(p.status);
+    strncpy(p.status_label, fallback, kStatusLen - 1);
+    p.status_label[kStatusLen - 1] = '\0';
 }
 
 static void fill_product(Product& p, JsonObject obj) {
@@ -30,10 +155,10 @@ static void fill_product(Product& p, JsonObject obj) {
     p.stock = obj["num_in_stock"] | obj["stock"] | 0;
     p.sold = obj["num_sold"] | obj["sold"] | 0;
 
-    const char* api_status = obj["status"] | obj["state"] | "";
-    p.status = status_from_api(api_status, p.stock);
-    strncpy(p.status_label, label_from_status(p.status), kStatusLen - 1);
-    p.status_label[kStatusLen - 1] = '\0';
+    const char* api_status = obj["status"] | "";
+    const char* api_state = obj["state"] | "";
+    p.status = status_from_api(api_status, api_state, p.stock);
+    set_status_label(p, api_status, api_state);
 
     const char* price = obj["price"] | "";
     strncpy(p.price, price, kPriceLen - 1);
