@@ -132,6 +132,17 @@ cp include/config.h.example include/config.h
 
 ---
 
+## Supported hardware
+
+| Device | Status | Notes |
+|--------|--------|-------|
+| **M5StickC Plus2** | Supported | Tested target — 240×135 LCD (landscape), 2 buttons, WiFi, IMU, buzzer, battery |
+| **M5StickS3** | Planned | Same **240×135** panel; UI should port cleanly. Needs a separate PlatformIO env and button/power differences. **Not tested yet** — support will be added when there’s time and interest. PRs welcome if you have hardware on the bench. |
+
+**Not supported:** original M5StickC (smaller display), M5Stack Core, Paper, and other boards.
+
+---
+
 ## Build & flash
 
 ```bash
