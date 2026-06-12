@@ -2,15 +2,13 @@
   <img src="./img/logo.png" alt="TindieLink" width="480">
 </p>
 
-<h1 align="center">TindieLink</h1>
-
 <p align="center">
   <strong>Your Tindie shop on your desk — live, tiny, and impossible to ignore.</strong><br>
   Firmware for <strong>M5StickC Plus2</strong> · 240×135 landscape · WiFi · seller API v2
 </p>
 
 <p align="center">
-  <img src="./img/ui-010.png" alt="Product list" width="400">
+  <img src="./img/ui-010.png" alt="Product list (1:1 device screenshot, 240×135)" width="240" height="135">
 </p>
 
 Stick it where you can see it. The Plus2 has a **small magnet** on the back — slap it on a lamp, a shelf, the fridge, whatever’s in your line of sight while you solder, ship, or pretend to work. Your store syncs in the background; when stock moves or something sells out, you’ll know without opening another browser tab. Little shop monitor, big peace of mind.
@@ -33,7 +31,7 @@ Stick it where you can see it. The Plus2 has a **small magnet** on the back — 
 ### Boot & WiFi
 
 <p align="center">
-  <img src="./img/ui-1.png" alt="WiFi connecting" width="400">
+  <img src="./img/ui-1.png" alt="WiFi connecting (1:1 device screenshot)" width="236" height="131">
 </p>
 
 | Zone | What it does |
@@ -48,7 +46,7 @@ Stick it where you can see it. The Plus2 has a **small magnet** on the back — 
 ### Product list
 
 <p align="center">
-  <img src="./img/ui-010.png" alt="Product list with store header" width="400">
+  <img src="./img/ui-010.png" alt="Product list with store header (1:1 device screenshot, 240×135)" width="240" height="135">
 </p>
 
 | Zone | What it does |
@@ -69,9 +67,9 @@ Up to **four products** visible at once; **BtnB** walks the list, **BtnA** opens
 ### Product detail
 
 <p align="center">
-  <img src="./img/ui-007.png" alt="Detail — for sale" width="400">
+  <img src="./img/ui-007.png" alt="Detail — for sale (1:1 device screenshot, 240×135)" width="240" height="135">
   &nbsp;
-  <img src="./img/ui-003.png" alt="Detail — sold out" width="400">
+  <img src="./img/ui-003.png" alt="Detail — sold out (1:1 device screenshot, 240×135)" width="240" height="135">
 </p>
 
 | Zone | What it does |
