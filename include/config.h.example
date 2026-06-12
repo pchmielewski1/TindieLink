@@ -1,0 +1,11 @@
+#pragma once
+
+#define WIFI_SSID "your-2.4ghz-ssid"
+#define WIFI_PASSWORD "your-wifi-password"
+#define TINDIE_USERNAME "your_store_slug"  // Tindie store username, NOT login email
+#define TINDIE_API_KEY "your_api_key_from_seller_tools"
+#define POLL_INTERVAL_SEC 60
+#define THUMB_CACHE_TTL_SEC 1800
+#define THUMB_CACHE_SLOTS 6
+
+bool config_is_valid();

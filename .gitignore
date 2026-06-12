@@ -1,0 +1,37 @@
+# Dev-only — not needed to build or flash firmware
+test/
+tools/
+scripts/
+fixtures/
+
+# Secrets and local credentials (copy from config.h.example)
+include/config.h
+.env
+.env.*
+
+# PlatformIO build artifacts
+.pio/
+.pioenvs/
+.piolibdeps/
+.clang_complete
+.gcc-flags.json
+compile_commands.json
+
+# Python venv (PlatformIO CLI — keep locally, do not delete or commit)
+.venv/
+__pycache__/
+*.py[cod]
+*$py.class
+.Python
+*.egg-info/
+.eggs/
+dist/
+build/
+
+# Editor / OS
+.vscode/
+.idea/
+*.swp
+*~
+.DS_Store
+Thumbs.db
