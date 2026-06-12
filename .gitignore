@@ -4,7 +4,6 @@ tools/
 scripts/
 fixtures/
 dev/
-img/ui-*.png
 
 # Secrets and local credentials (copy from config.h.example)
 include/config.h
