@@ -115,6 +115,10 @@ cp include/config.h.example include/config.h
 | `TINDIE_API_KEY` | Seller API key from Tindie seller tools |
 | `POLL_INTERVAL_SEC` | How often to refresh the product list (seconds, min. 10) |
 | `THUMB_CACHE_SLOTS` | How many baked product thumbnails to keep in PSRAM (1–32, LRU eviction) |
+| `ORIENTATION_AUTO_FLIP` | `1` = flip LCD 180° via IMU when stick is upside-down on a vertical mount |
+| `ORIENTATION_ACCEL_AXIS` | IMU accel axis for flip detection: `0`=X, `1`=Y, `2`=Z (tune on your mount) |
+| `ORIENTATION_INVERT` | `1` if flip direction is reversed on your mount |
+| `ORIENTATION_DEBUG` | `1` = IMU debug on Serial (`__DBG__` NDJSON ~every 800 ms + flip lines). Capture: `pio device monitor \| python3 tools/debug_serial_ingest.py` |
 | `TIMEZONE_TZ` | POSIX timezone string for the clock in the header |
 | `TIMEZONE_DST_AUTO` | `1` = automatic summer/winter time; `0` = fixed offset |
 | `TIMEZONE_OFFSET_SEC` | Fixed UTC offset when DST auto is off |

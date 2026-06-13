@@ -2,9 +2,11 @@
 #include "config.h"
 #include "product_filter.h"
 #include "tindie_client.h"
+#include "orientation.h"
 #include "thumb_loader.h"
 #include "ui.h"
 #include "wifi_setup.h"
+#include <M5Unified.h>
 #include <M5StickCPlus2.h>
 #include <string.h>
 
@@ -179,11 +181,16 @@ void app_init(AppContext* ctx, ProductsCache* cache) {
     ctx->last_http_code = 0;
     g_last_poll_ms = millis();
     mark_ui_dirty();
+    orientation_init();
 }
 
 void app_tick(AppContext* ctx, ProductsCache* cache) {
     StickCP2.update();
     thumb_loader_tick();
+
+    if (orientation_tick(thumb_loader_is_busy())) {
+        mark_ui_dirty();
+    }
 
     const bool thumb_busy = thumb_loader_is_busy();
     if (g_thumb_busy_prev && !thumb_busy && ctx->screen == ScreenDetail) {
@@ -191,6 +198,28 @@ void app_tick(AppContext* ctx, ProductsCache* cache) {
         mark_ui_dirty();
     }
     g_thumb_busy_prev = thumb_busy;
+
+    if (M5.BtnA.wasPressed() && ctx->screen == ScreenList && cache->count > 0) {
+        ctx->detail_index = ctx->selected_index;
+        ctx->screen = ScreenDetail;
+        request_detail_thumb(cache, ctx);
+        mark_ui_dirty();
+    } else if (M5.BtnA.wasPressed() && ctx->screen == ScreenDetail && cache->count > 0) {
+        ctx->detail_index = (ctx->detail_index + 1) % cache->count;
+        request_detail_thumb(cache, ctx);
+        mark_ui_dirty();
+    }
+
+    if (M5.BtnB.wasPressed() && ctx->screen == ScreenList && cache->count > 0) {
+        ctx->selected_index = (ctx->selected_index + 1) % cache->count;
+        clamp_selection(ctx, cache);
+        mark_ui_dirty();
+    } else if (M5.BtnB.wasPressed() && ctx->screen == ScreenDetail) {
+        ctx->selected_index = ctx->detail_index;
+        ctx->screen = ScreenList;
+        clamp_selection(ctx, cache);
+        mark_ui_dirty();
+    }
 
     const unsigned long now = millis();
 
@@ -201,28 +230,6 @@ void app_tick(AppContext* ctx, ProductsCache* cache) {
                 g_last_poll_ms = now;
             }
         }
-    }
-
-    if (StickCP2.BtnA.wasPressed() && ctx->screen == ScreenList && cache->count > 0) {
-        ctx->detail_index = ctx->selected_index;
-        ctx->screen = ScreenDetail;
-        request_detail_thumb(cache, ctx);
-        mark_ui_dirty();
-    } else if (StickCP2.BtnA.wasPressed() && ctx->screen == ScreenDetail && cache->count > 0) {
-        ctx->detail_index = (ctx->detail_index + 1) % cache->count;
-        request_detail_thumb(cache, ctx);
-        mark_ui_dirty();
-    }
-
-    if (StickCP2.BtnB.wasPressed() && ctx->screen == ScreenList && cache->count > 0) {
-        ctx->selected_index = (ctx->selected_index + 1) % cache->count;
-        clamp_selection(ctx, cache);
-        mark_ui_dirty();
-    } else if (StickCP2.BtnB.wasPressed() && ctx->screen == ScreenDetail) {
-        ctx->selected_index = ctx->detail_index;
-        ctx->screen = ScreenList;
-        clamp_selection(ctx, cache);
-        mark_ui_dirty();
     }
 
     ui_redraw_if_needed(ctx, cache);

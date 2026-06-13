@@ -5,6 +5,21 @@
 #include <M5StickCPlus2.h>
 #include <stdio.h>
 
+static bool g_landscape_upside_down = false;
+
+bool ui_apply_landscape_flip(bool upside_down) {
+    if (g_landscape_upside_down == upside_down) {
+        return false;
+    }
+    g_landscape_upside_down = upside_down;
+    StickCP2.Display.setRotation(upside_down ? 3 : 1);
+    return true;
+}
+
+bool ui_landscape_is_upside_down(void) {
+    return g_landscape_upside_down;
+}
+
 void ui_init() {
     Serial.println("[TindieLink] ui_init: M5.begin...");
     Serial.flush();
@@ -16,6 +31,7 @@ void ui_init() {
     Serial.println("[TindieLink] ui_init: M5.begin OK");
     Serial.flush();
 
+    g_landscape_upside_down = false;
     StickCP2.Display.setRotation(1);
     StickCP2.Display.setBrightness(80);
     ui_begin_boot_frame();

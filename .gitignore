@@ -3,7 +3,7 @@ test/
 tools/
 scripts/
 fixtures/
-dev/
+docs/
 
 # Secrets and local credentials (copy from config.h.example)
 include/config.h

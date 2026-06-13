@@ -7,6 +7,18 @@
 #ifndef UI_FRAME_DUMP
 #define UI_FRAME_DUMP 0
 #endif
+#ifndef ORIENTATION_AUTO_FLIP
+#define ORIENTATION_AUTO_FLIP 1
+#endif
+#ifndef ORIENTATION_ACCEL_AXIS
+#define ORIENTATION_ACCEL_AXIS 1
+#endif
+#ifndef ORIENTATION_INVERT
+#define ORIENTATION_INVERT 0
+#endif
+#ifndef ORIENTATION_DEBUG
+#define ORIENTATION_DEBUG 0
+#endif
 #ifndef TIMEZONE_DST_AUTO
 #define TIMEZONE_DST_AUTO 1
 #endif
@@ -42,6 +54,11 @@ bool config_is_valid() {
         && THUMB_CACHE_SLOTS >= 1
         && THUMB_CACHE_SLOTS <= 32
         && (UI_FRAME_DUMP == 0 || UI_FRAME_DUMP == 1)
+        && flag01(ORIENTATION_AUTO_FLIP)
+        && ORIENTATION_ACCEL_AXIS >= 0
+        && ORIENTATION_ACCEL_AXIS <= 2
+        && flag01(ORIENTATION_INVERT)
+        && flag01(ORIENTATION_DEBUG)
         && (TIMEZONE_DST_AUTO == 0 || TIMEZONE_DST_AUTO == 1)
         && TIMEZONE_OFFSET_SEC >= -43200
         && TIMEZONE_OFFSET_SEC <= 50400
