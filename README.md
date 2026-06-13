@@ -114,8 +114,7 @@ cp include/config.h.example include/config.h
 | `TINDIE_USERNAME` | Store **slug** from your Tindie URL (not your login email) |
 | `TINDIE_API_KEY` | Seller API key from Tindie seller tools |
 | `POLL_INTERVAL_SEC` | How often to refresh the product list (seconds, min. 10) |
-| `THUMB_CACHE_TTL_SEC` | How long cached thumbnails stay valid |
-| `THUMB_CACHE_SLOTS` | How many product images to keep in memory (1–8) |
+| `THUMB_CACHE_SLOTS` | How many baked product thumbnails to keep in PSRAM (1–32, LRU eviction) |
 | `TIMEZONE_TZ` | POSIX timezone string for the clock in the header |
 | `TIMEZONE_DST_AUTO` | `1` = automatic summer/winter time; `0` = fixed offset |
 | `TIMEZONE_OFFSET_SEC` | Fixed UTC offset when DST auto is off |

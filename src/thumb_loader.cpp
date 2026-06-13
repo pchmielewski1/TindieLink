@@ -11,15 +11,12 @@
 #include <string.h>
 #include <stdarg.h>
 
-#ifndef THUMB_CACHE_TTL_SEC
-#define THUMB_CACHE_TTL_SEC 1800
-#endif
 #ifndef THUMB_CACHE_SLOTS
-#define THUMB_CACHE_SLOTS 6
+#define THUMB_CACHE_SLOTS 16
 #endif
 
-#if THUMB_CACHE_SLOTS < 1 || THUMB_CACHE_SLOTS > 8
-#error "THUMB_CACHE_SLOTS must be 1..8"
+#if THUMB_CACHE_SLOTS < 1 || THUMB_CACHE_SLOTS > 32
+#error "THUMB_CACHE_SLOTS must be 1..32"
 #endif
 
 // Transient download cap (medium PNG ~680 KB); cache holds baked RGB565 only (~32 KB).

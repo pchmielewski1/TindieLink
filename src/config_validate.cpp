@@ -1,11 +1,8 @@
 #include "config.h"
 #include <string.h>
 
-#ifndef THUMB_CACHE_TTL_SEC
-#define THUMB_CACHE_TTL_SEC 1800
-#endif
 #ifndef THUMB_CACHE_SLOTS
-#define THUMB_CACHE_SLOTS 6
+#define THUMB_CACHE_SLOTS 16
 #endif
 #ifndef UI_FRAME_DUMP
 #define UI_FRAME_DUMP 0
@@ -42,9 +39,8 @@ bool config_is_valid() {
         && strlen(TINDIE_USERNAME) > 0
         && strlen(TINDIE_API_KEY) > 0
         && POLL_INTERVAL_SEC >= 10
-        && THUMB_CACHE_TTL_SEC >= 60
         && THUMB_CACHE_SLOTS >= 1
-        && THUMB_CACHE_SLOTS <= 8
+        && THUMB_CACHE_SLOTS <= 32
         && (UI_FRAME_DUMP == 0 || UI_FRAME_DUMP == 1)
         && (TIMEZONE_DST_AUTO == 0 || TIMEZONE_DST_AUTO == 1)
         && TIMEZONE_OFFSET_SEC >= -43200
